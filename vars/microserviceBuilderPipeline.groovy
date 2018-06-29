@@ -117,7 +117,7 @@ def call(body) {
       stage ('Devops check') {
 	def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
         print "Guessing the endpoint for Devops is ${devopsEndpoint}"
-        def curlOutput = sh(script: 'curl ${devopsEndpoint}', returnStdout: true)
+        def curlOutput = sh(script: 'curl -s -k ${devopsEndpoint}', returnStdout: true)
         print "Curl output: ${curlOutput}"
       }
 	    
