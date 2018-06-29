@@ -74,7 +74,13 @@ def call(body) {
   def alwaysPullImage = (env.ALWAYS_PULL_IMAGE == null) ? true : env.ALWAYS_PULL_IMAGE.toBoolean()
   def mavenSettingsConfigMap = env.MAVEN_SETTINGS_CONFIG_MAP?.trim()
   def helmTlsOptions = " --tls --tls-ca-cert=/msb_helm_sec/ca.pem --tls-cert=/msb_helm_sec/cert.pem --tls-key=/msb_helm_sec/key.pem " 
+  def mcReleaseName = (env.RELEASE_NAME)
 
+  def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
+  print "Guessing the endpoint for Devops is ${devopsEndpoint}"
+  def curlOutput = sh(script: "curl ${devopsEndpoint}", returnStdout: true)
+  echo "Curl output: ${curlOutput}"
+	
   print "microserviceBuilderPipeline: registry=${registry} registrySecret=${registrySecret} build=${build} \
   deploy=${deploy} test=${test} debug=${debug} namespace=${namespace} \
   chartFolder=${chartFolder} manifestFolder=${manifestFolder} alwaysPullImage=${alwaysPullImage} serviceAccountName=${serviceAccountName}"
