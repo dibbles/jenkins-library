@@ -75,11 +75,6 @@ def call(body) {
   def mavenSettingsConfigMap = env.MAVEN_SETTINGS_CONFIG_MAP?.trim()
   def helmTlsOptions = " --tls --tls-ca-cert=/msb_helm_sec/ca.pem --tls-cert=/msb_helm_sec/cert.pem --tls-key=/msb_helm_sec/key.pem " 
   def mcReleaseName = (env.RELEASE_NAME)
-
-  def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
-  print "Guessing the endpoint for Devops is ${devopsEndpoint}"
-  def curlOutput = sh(script: 'curl ${devopsEndpoint}', returnStdout: true)
-  print "Curl output: ${curlOutput}"
 	
   print "microserviceBuilderPipeline: registry=${registry} registrySecret=${registrySecret} build=${build} \
   deploy=${deploy} test=${test} debug=${debug} namespace=${namespace} \
@@ -117,7 +112,15 @@ def call(body) {
     ],
     volumes: volumes
   ) {
-    node('msbPod') {
+    node('msbPod') {	    
+	      
+      stage ('Devops check') {
+	def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
+        print "Guessing the endpoint for Devops is ${devopsEndpoint}"
+        def curlOutput = sh(script: 'curl ${devopsEndpoint}', returnStdout: true)
+        print "Curl output: ${curlOutput}"
+      }
+	    
       def gitCommit
       def gitCommitMessage
 
