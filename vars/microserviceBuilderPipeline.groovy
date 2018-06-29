@@ -78,8 +78,8 @@ def call(body) {
 
   def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
   print "Guessing the endpoint for Devops is ${devopsEndpoint}"
-  def curlOutput = sh(script: "curl ${devopsEndpoint}", returnStdout: true)
-  echo "Curl output: ${curlOutput}"
+  def curlOutput = sh(script: 'curl ${devopsEndpoint}', returnStdout: true)
+  print "Curl output: ${curlOutput}"
 	
   print "microserviceBuilderPipeline: registry=${registry} registrySecret=${registrySecret} build=${build} \
   deploy=${deploy} test=${test} debug=${debug} namespace=${namespace} \
