@@ -117,6 +117,11 @@ def call(body) {
       stage ('Devops check') {
 	def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
         print "Guessing the endpoint for Devops is ${devopsEndpoint}"
+	// If this throws error code 6 it's a host not found problem
+	
+	print "Printing known environment variables, need to figure out Devops service hostname and port probably"
+	echo sh(returnStdout: true, script: 'env')	      
+	      
         def curlOutput = sh(script: "curl -s -k ${devopsEndpoint}", returnStdout: true)
         print "Curl output: ${curlOutput}"
       }
