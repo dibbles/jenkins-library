@@ -115,12 +115,9 @@ def call(body) {
     node('msbPod') {	    
 	      
       stage ('Devops check') {	
-	// These are job variables, not env variables from the node
 	def envVars = sh(returnStdout: true, script: 'env')
-	//def envVars = Jenkins.instance.getGlobalNodeProperties()[0].getEnvVars()
-	print "Env vars: ${envVars}"	      
-	def devopsHost = envVars | grep "${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST"
-	def devopsPort = envVars | grep "${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT"
+	def devopsHost = sh(returnStdout: true, script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST"
+	def devopsPort = sh(returnStdout: true, script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT"
 	// Would be easier to do def devopsEndpoint = "https://${mcReleaseName}-devops:9191"  
 	// gives error code 6 from curl though (host not found problem)
 	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
