@@ -76,6 +76,12 @@ def call(body) {
   def helmTlsOptions = " --tls --tls-ca-cert=/msb_helm_sec/ca.pem --tls-cert=/msb_helm_sec/cert.pem --tls-key=/msb_helm_sec/key.pem " 
   def mcReleaseName = (env.RELEASE_NAME)
 	
+  def test1 = (env."${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST")
+  def test2 = (env."${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT")
+	 
+  print "test1: ${test1}"
+  print "test2: ${test2}"	
+	
   print "microserviceBuilderPipeline: registry=${registry} registrySecret=${registrySecret} build=${build} \
   deploy=${deploy} test=${test} debug=${debug} namespace=${namespace} \
   chartFolder=${chartFolder} manifestFolder=${manifestFolder} alwaysPullImage=${alwaysPullImage} serviceAccountName=${serviceAccountName}"
