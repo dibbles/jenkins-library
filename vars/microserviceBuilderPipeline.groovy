@@ -114,16 +114,18 @@ def call(body) {
   ) {
     node('msbPod') {	    
 	      
-      stage ('Devops check') {
-	def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
+      stage ('Devops check') {	
+	def envVars = Jenkins.instance.getGlobalNodeProperties()[0].getEnvVars()
+	def devopsHost = envVars["${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST"]
+	def devopsPort = envVars["${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT"]
+	// Would be easier to do
+	//def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
+	// Discover it the K8s sevice way
+	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
         print "Guessing the endpoint for Devops is ${devopsEndpoint}"
-	// If this throws error code 6 it's a host not found problem
-	
-	print "Printing known environment variables, need to figure out Devops service hostname and port probably"
-	echo sh(returnStdout: true, script: 'env')	      
-	      
+	// If this throws error code 6 it's a host not found problem	      
         def curlOutput = sh(script: "curl -s -k ${devopsEndpoint}", returnStdout: true)
-        print "Curl output: ${curlOutput}"
+        print "Curl output from determined Devops endpoint: ${curlOutput}"
       }
 	    
       def gitCommit
