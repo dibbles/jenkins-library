@@ -112,12 +112,13 @@ def call(body) {
     ],
     volumes: volumes
   ) {
-    node('msbPod') {	    
-	      
-      stage ('Devops check') {	
+    node('msbPod') {	      
+      stage ('Devops check') {
 	def envVars = sh(returnStdout: true, script: 'env')
-	def devopsHost = sh(returnStdout: true, script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST")			    
-	def devopsPort = sh(returnStdout: true, script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT")
+	def devopsHost = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST", returnStdout: true)
+	print "Determined the Devops host is ${devopsHost}"
+	def devopsPort = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT", returnStdout: true)
+	print "Determined the Devops port is ${devopsPort}"
 	// Would be easier to do def devopsEndpoint = "https://${mcReleaseName}-devops:9191"  
 	// gives error code 6 from curl though (host not found problem)
 	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
