@@ -114,10 +114,10 @@ def call(body) {
   ) {
     node('msbPod') {
       stage ('Devops check') {
-	//def devopsHost = sh(script: "eval \"echo \$${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST\"", returnStdout: true)		       
-        //def devopsPort = sh(script: "eval \"echo \$${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT\"", returnStdout: true)
-	def devopsHost = ${env.${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST}
-	def devopsPort = ${env.${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT}
+	def devopsHost = sh(script: 'echo \"$mcReleaseName_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST\"', returnStdout: true)		       
+        def devopsPort = sh(script: 'echo \"$mcReleaseName_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT\"', returnStdout: true)
+	//def devopsHost = ${env.${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST}
+	//def devopsPort = ${env.${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT}
 	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
         print "Guessing the endpoint for Devops is ${devopsEndpoint}"
         def curlOutput = sh(script: "curl -s -k ${devopsEndpoint}", returnStdout: true)
