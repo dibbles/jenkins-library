@@ -74,14 +74,8 @@ def call(body) {
   def alwaysPullImage = (env.ALWAYS_PULL_IMAGE == null) ? true : env.ALWAYS_PULL_IMAGE.toBoolean()
   def mavenSettingsConfigMap = env.MAVEN_SETTINGS_CONFIG_MAP?.trim()
   def helmTlsOptions = " --tls --tls-ca-cert=/msb_helm_sec/ca.pem --tls-cert=/msb_helm_sec/cert.pem --tls-key=/msb_helm_sec/key.pem " 
-  def mcReleaseName = (env.RELEASE_NAME)
-	
-  def test1 = (env."${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST")
-  def test2 = (env."${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT")
-	 
-  print "test1: ${test1}"
-  print "test2: ${test2}"	
-	
+  def mcReleaseName = (env.RELEASE_NAME)	
+
   print "microserviceBuilderPipeline: registry=${registry} registrySecret=${registrySecret} build=${build} \
   deploy=${deploy} test=${test} debug=${debug} namespace=${namespace} \
   chartFolder=${chartFolder} manifestFolder=${manifestFolder} alwaysPullImage=${alwaysPullImage} serviceAccountName=${serviceAccountName}"
@@ -119,21 +113,9 @@ def call(body) {
     volumes: volumes
   ) {
     node('msbPod') {
-      stage ('Devops check') {
-	def devopsHost = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST'.execute().text
-        devopsHost.waitFor()
-	echo "Think the host (execute way) is ${devopsHost}" 
-	def devopsPort = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT'.execute().text
-        devopsPort.waitFor()
-	echo "Think the port (execute way) is ${devopsPort}"
-	      
-	// This doesn't even do the grep	      
-	//def devopsHost = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST", returnStdout: true)
-	//print "Determined the Devops host is ${devopsHost}"
-	//def devopsPort = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT", returnStdout: true)
-	//print "Determined the Devops port is ${devopsPort}"
-	// Would be easier to do def devopsEndpoint = "https://${mcReleaseName}-devops:9191"  
-	// gives error code 6 from curl though (host not found problem)
+      stage ('Devops check') {	      
+	def devopsHost = sh(script: echo ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST", returnStdout: true)		       
+        def devopsPort = sh(script: echo ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT", returnStdout: true)
 	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
         print "Guessing the endpoint for Devops is ${devopsEndpoint}"
         def curlOutput = sh(script: "curl -s -k ${devopsEndpoint}", returnStdout: true)
