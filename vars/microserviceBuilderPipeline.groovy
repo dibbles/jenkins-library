@@ -112,13 +112,21 @@ def call(body) {
     ],
     volumes: volumes
   ) {
-    node('msbPod') {	      
+    node('msbPod') {
       stage ('Devops check') {
 	def envVars = sh(returnStdout: true, script: 'env')
-	def devopsHost = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST", returnStdout: true)
-	print "Determined the Devops host is ${devopsHost}"
-	def devopsPort = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT", returnStdout: true)
-	print "Determined the Devops port is ${devopsPort}"
+	def devopsHost = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST'.execute()
+        devopsHost.waitFor()
+	echo "Think the host (execute way) is ${devopsHost}"      
+	def devopsPort = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT'.execute()
+        devopsPort.waitFor()	      
+	echo "Think the port (execute way) is ${devopsPort}"
+	      
+	// This doesn't even do the grep	      
+	//def devopsHost = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST", returnStdout: true)
+	//print "Determined the Devops host is ${devopsHost}"
+	//def devopsPort = sh(script: "echo ${envVars} | grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT", returnStdout: true)
+	//print "Determined the Devops port is ${devopsPort}"
 	// Would be easier to do def devopsEndpoint = "https://${mcReleaseName}-devops:9191"  
 	// gives error code 6 from curl though (host not found problem)
 	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
