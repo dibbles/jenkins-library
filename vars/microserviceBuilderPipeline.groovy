@@ -116,14 +116,13 @@ def call(body) {
 	      
       stage ('Devops check') {	
 	def envVars = Jenkins.instance.getGlobalNodeProperties()[0].getEnvVars()
-	def devopsHost = envVars["${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST"]
-	def devopsPort = envVars["${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT"]
-	// Would be easier to do
-	//def devopsEndpoint = "https://${mcReleaseName}-devops:9191"
-	// Discover it the K8s sevice way
+	print "Env vars: ${envVars}"	      
+	def devopsHost = envVars['${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST']
+	def devopsPort = envVars['${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT']
+	// Would be easier to do def devopsEndpoint = "https://${mcReleaseName}-devops:9191"  
+	// gives error code 6 from curl though (host not found problem)
 	def devopsEndpoint = "https://${devopsHost}:${devopsPort}"
         print "Guessing the endpoint for Devops is ${devopsEndpoint}"
-	// If this throws error code 6 it's a host not found problem	      
         def curlOutput = sh(script: "curl -s -k ${devopsEndpoint}", returnStdout: true)
         print "Curl output from determined Devops endpoint: ${curlOutput}"
       }
