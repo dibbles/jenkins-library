@@ -114,12 +114,11 @@ def call(body) {
   ) {
     node('msbPod') {
       stage ('Devops check') {
-	def envVars = sh(returnStdout: true, script: 'env')
-	def devopsHost = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST'.execute()
+	def devopsHost = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_HOST'.execute().text
         devopsHost.waitFor()
-	echo "Think the host (execute way) is ${devopsHost}"      
-	def devopsPort = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT'.execute()
-        devopsPort.waitFor()	      
+	echo "Think the host (execute way) is ${devopsHost}" 
+	def devopsPort = 'env'.execute() | 'grep ${mcReleaseName}_IBM_MICROCLIMATE_DEVOPS_SERVICE_PORT'.execute().text
+        devopsPort.waitFor()
 	echo "Think the port (execute way) is ${devopsPort}"
 	      
 	// This doesn't even do the grep	      
