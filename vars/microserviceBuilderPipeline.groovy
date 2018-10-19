@@ -150,6 +150,7 @@ def call(def body = null) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
+        body.PostExtract()
       }
 
       def imageTag = null
@@ -163,12 +164,15 @@ def call(def body = null) {
                 mvnCommand += " --settings /msb_mvn_cfg/settings.xml"
               }
               mvnCommand += " ${mvnCommands}"
+              body.PreMaven()
               sh mvnCommand
+              body.PostMaven()
             }
           }
         }
 
         if (fileExists('Dockerfile')) {
+          body.PreDockerBuild()
           if (fileExists('Package.swift')) {          
             echo "Detected Swift project with a Dockerfile..."
           
@@ -244,6 +248,7 @@ def call(def body = null) {
             }
           }
         }
+        body.PostDockerBuild()
       }
 
       def realChartFolder = null
