@@ -40,7 +40,7 @@ import java.util.UUID
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
-def call(body) {
+def call(def body = null) {
   def config = [:]
   // Parameter expansion works after the call to body() below.
   // See https://jenkins.io/doc/book/pipeline/shared-libraries/ 'Defining a more structured DSL'
@@ -137,18 +137,23 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-	  checkout scm
-	  fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-	  gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-	  previousCommitStatus = sh(script: 'git rev-parse -q --short HEAD~1', returnStatus: true)      
-	  // If no previous commit is found, below commands need not run but build should continue
-	  // Only run when a previous commit exists to avoid pipeline fail on exit code
-	  if (previousCommitStatus == 0){ 
-	    previousCommit = sh(script: 'git rev-parse -q --short HEAD~1', returnStdout: true).trim()
-	    echo "Previous commit exists: ${previousCommit}"
-	  }
-	  gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
-	  echo "Checked out git commit ${gitCommit}"
+        steps {
+          script {
+            body != null ? body() : PreExtract()
+          }
+        }
+	checkout scm
+	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+	previousCommitStatus = sh(script: 'git rev-parse -q --short HEAD~1', returnStatus: true)      
+	// If no previous commit is found, below commands need not run but build should continue
+	// Only run when a previous commit exists to avoid pipeline fail on exit code
+	if (previousCommitStatus == 0){ 
+	  previousCommit = sh(script: 'git rev-parse -q --short HEAD~1', returnStdout: true).trim()
+	  echo "Previous commit exists: ${previousCommit}"
+	}
+	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
+	echo "Checked out git commit ${gitCommit}"
       }
 
       def imageTag = null
@@ -450,4 +455,8 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
       }
     }
   }
+}
+
+def PreExtract() {
+  echo "No PreExtract"
 }
