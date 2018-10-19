@@ -40,7 +40,7 @@ import java.util.UUID
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
-def call(def body = null) {
+def call(body) {
   def config = [:]
   // Parameter expansion works after the call to body() below.
   // See https://jenkins.io/doc/book/pipeline/shared-libraries/ 'Defining a more structured DSL'
