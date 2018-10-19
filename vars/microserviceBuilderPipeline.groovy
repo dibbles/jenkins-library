@@ -137,11 +137,7 @@ def call(def body = null) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        steps {
-          script {
-            body != null ? body() : PreExtract()
-          }
-        }
+        body.PreExtract()
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
