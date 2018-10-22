@@ -49,6 +49,9 @@ def call(body) {
   body.delegate = config
   body()
 
+  this.Foo()
+  body.Foo()
+
   print "microserviceBuilderPipeline : config = ${config}"
 
   // User configurable options
