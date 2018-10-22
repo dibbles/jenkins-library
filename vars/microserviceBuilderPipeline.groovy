@@ -258,7 +258,7 @@ def call(body) {
             }
           }
         }
-        if (body.metaClass.respondsTo("PostDockerBuild") {
+        if (body.metaClass.respondsTo("PostDockerBuild")) {
           body.PostDockerBuild()
         }
       }
@@ -275,7 +275,7 @@ def call(body) {
 
       if (test && fileExists('pom.xml') && realChartFolder != null && fileExists(realChartFolder)) {
         stage ('Verify') {
-          if (body.metaClass.respondsTo("PreVerify") {
+          if (body.metaClass.respondsTo("PreVerify")) {
             body.PreVerify()
           }
           testNamespace = "testns-${env.BUILD_ID}-" + UUID.randomUUID()
