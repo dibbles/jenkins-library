@@ -137,7 +137,11 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        def cat=body
+
+                
+
+        echo String.valueOf(body.Overrides.getMethods())
+        echo String.valueOf(body.Overrides.metaClass.respondsTo("PreExtract"))
         def dog = cat.metaClass.getMethods()
         echo String.valueOf(dog)
         def foo = body.metaClass.getMethods()
