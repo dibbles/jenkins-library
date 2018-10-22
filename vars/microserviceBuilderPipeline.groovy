@@ -479,3 +479,6 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
     }
   }
 }
+
+def PreExtract() {}
+def PostExtract() {}
