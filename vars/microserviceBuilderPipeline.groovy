@@ -40,7 +40,7 @@ import java.util.UUID
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
-def call(def body = null) {
+def call(body) {
   def config = [:]
   // Parameter expansion works after the call to body() below.
   // See https://jenkins.io/doc/book/pipeline/shared-libraries/ 'Defining a more structured DSL'
@@ -137,7 +137,7 @@ def call(def body = null) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-          body.PreExtract()
+        body.PreExtract()
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -467,11 +467,19 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
 def PreExtract() {
   echo "No custom PreExtract() method in Jenkinsfile."
 }
+
 def PostExtract() {echo "No custom PostExtract() method in Jenkinsfile."}
+
 def PreMavenBuild() {echo "No custom PreMavenBuild() method in Jenkinsfile."}
+
 def PostMavenBuild() {echo "No custom PostMavenBuild() method in Jenkinsfile."}
+
 def PreDockerBuild() {echo "No custom PreDockerBuild() method in Jenkinsfile."}
+
 def PostDockerBuild() {echo "No custom PostDockerBuild() method in Jenkinsfile."}
+
 def PreVerify() {echo "No custom PreVerify() method in Jenkinsfile."}
+
 def PostVerify() {echo "No custom PostVerify() method in Jenkinsfile."}
+
 def PreDeploy() {echo "No custom PreDeploy() method in Jenkinsfile."}
