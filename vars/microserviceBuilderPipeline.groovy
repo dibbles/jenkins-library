@@ -49,15 +49,6 @@ def call(body) {
   body.delegate = config
   body()
 
-  stages {
-  stage('Bob') {
-    steps {
-      script {
-        Foo()
-      }
-    }
-  }
-}
   print "microserviceBuilderPipeline : config = ${config}"
 
   // User configurable options
@@ -147,7 +138,11 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-
+        steps {
+          script {
+            Foo()
+          }
+        }
         body.PreExtract()        
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
@@ -475,4 +470,4 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
   }
 }
 
-def foo() {}
+def Foo() { echo "waaaaa" }
