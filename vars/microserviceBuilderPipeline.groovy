@@ -138,7 +138,8 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        
+      
+        echo String.valueOf(body.metaClass.getProperties())  
         PreExtract()        
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
