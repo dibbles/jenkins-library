@@ -40,7 +40,7 @@ import java.util.UUID
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
-def call(def body = null) {
+def call(body) {
 
   def config = [:]
   // Parameter expansion works after the call to body() below.
@@ -138,12 +138,8 @@ def call(def body = null) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        steps {
-          script {
-            Foo()
-          }
-        }
-        body.PreExtract()        
+        
+        PreExtract()        
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -470,4 +466,4 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
   }
 }
 
-def Foo() { echo "waaaaa" }
+def PreExtract() { echo "waaaaa" }
