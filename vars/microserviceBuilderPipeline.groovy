@@ -41,6 +41,11 @@ import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
 def call(body) {
+
+  def foo() {
+   echo "1"
+  }
+
   def config = [:]
   // Parameter expansion works after the call to body() below.
   // See https://jenkins.io/doc/book/pipeline/shared-libraries/ 'Defining a more structured DSL'
@@ -138,23 +143,7 @@ def call(body) {
 
       stage ('Extract') {
 
-                
-
-        echo String.valueOf(body.Overrides.getMethods())
-        echo String.valueOf(body.Overrides.metaClass.respondsTo("PreExtract"))
-        def dog = cat.metaClass.getMethods()
-        echo String.valueOf(dog)
-        def foo = body.metaClass.getMethods()
-        echo String.valueOf(foo)
-        def a = body.metaClass.respondsTo(body, "PreExtract")
-        def b = body.metaClass.respondsTo(body, 'PreExtract')
-        def c = body.metaClass.respondsTo("PreExtract")
-        def d = body.metaClass.respondsTo('PreExtract')
-        echo String.valueOf(a)
-        echo String.valueOf(b)
-        echo String.valueOf(c)
-        echo String.valueOf(d)
-        body.PreExtract()
+        body.PreExtract()        
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
