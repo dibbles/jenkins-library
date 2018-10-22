@@ -462,7 +462,6 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
       }
     }
   }
-}
 
 def PreExtract() {echo "No custom PreExtract() method in Jenkinsfile."}
 def PostExtract() {echo "No custom PostExtract() method in Jenkinsfile."}
@@ -473,3 +472,5 @@ def PostDockerBuild() {echo "No custom PostDockerBuild() method in Jenkinsfile."
 def PreVerify() {echo "No custom PreVerify() method in Jenkinsfile."}
 def PostVerify() {echo "No custom PostVerify() method in Jenkinsfile."}
 def PreDeploy() {echo "No custom PreDeploy() method in Jenkinsfile."}
+
+}
