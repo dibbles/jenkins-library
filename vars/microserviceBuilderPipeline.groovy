@@ -137,7 +137,7 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        if (body.metaClass.respondsTo("PreExtract")) {
+        if (body.metaClass.respondsTo(body,'PreExtract')) {
           body.PreExtract()
         }
 	checkout scm
