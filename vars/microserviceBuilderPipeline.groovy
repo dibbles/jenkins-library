@@ -482,3 +482,10 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
 
 def PreExtract() {}
 def PostExtract() {}
+def PreMavenBuild() {}
+def PostMavenBuild() {}
+def PreDockerBuild() {}
+def PostDockerBuild() {}
+def PreVerify() {}
+def PostVerify() {}
+def PreDeploy() {}
