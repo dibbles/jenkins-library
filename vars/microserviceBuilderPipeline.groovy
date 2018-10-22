@@ -346,7 +346,7 @@ def call(body) {
 
       if (body.metaClass.respondsTo("PreDeploy")) {
         body.PreDeploy()
-      fi
+      }
 
       def result="commitID=${gitCommit}\\n" + 
            "fullCommit=${fullCommitID}\\n" +
@@ -478,8 +478,4 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
       }
     }
   }
-}
-
-def PreExtract() {
-  echo "No PreExtract"
 }
