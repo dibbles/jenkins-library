@@ -49,7 +49,14 @@ def call(body) {
   body.delegate = config
   body()
 
-  Foo()
+  
+  stage('Bob') {
+    steps {
+      script {
+        Foo()
+      }
+    }
+  }
 
   print "microserviceBuilderPipeline : config = ${config}"
 
