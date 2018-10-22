@@ -137,8 +137,8 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        if (body.respondsTo("PreExtract")) {
-          body.PreExtract()
+        if (body.metaClass.respondsTo("PreExtract")) {
+          body.preExtract()
         }
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
@@ -152,7 +152,9 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
-        body.PostExtract()
+        if (body.metaClass.respondsTo("PostExtract")) {
+          body.PostExtract()
+        }
       }
 
       def imageTag = null
@@ -166,15 +168,21 @@ def call(body) {
                 mvnCommand += " --settings /msb_mvn_cfg/settings.xml"
               }
               mvnCommand += " ${mvnCommands}"
-              body.PreMaven()
+              if (body.metaClass.respondsTo("PreMavenBuild")) {
+                body.PreMavenBuild()
+              }
               sh mvnCommand
-              body.PostMaven()
+              if (body.metaClass.respondsTo("PostMavenBuild")) {
+                body.PostMavenBuild()
+              }
             }
           }
         }
 
         if (fileExists('Dockerfile')) {
-          body.PreDockerBuild()
+          if (body.metaClass.respondsTo("PreDockerBuild") {
+            body.PreDockerBuild()
+          }
           if (fileExists('Package.swift')) {          
             echo "Detected Swift project with a Dockerfile..."
           
@@ -250,7 +258,9 @@ def call(body) {
             }
           }
         }
-        body.PostDockerBuild()
+        if (body.metaClass.respondsTo("PostDockerBuild") {
+          body.PostDockerBuild()
+        }
       }
 
       def realChartFolder = null
@@ -265,6 +275,9 @@ def call(body) {
 
       if (test && fileExists('pom.xml') && realChartFolder != null && fileExists(realChartFolder)) {
         stage ('Verify') {
+          if (body.metaClass.respondsTo("PreVerify") {
+            body.PreVerify()
+          }
           testNamespace = "testns-${env.BUILD_ID}-" + UUID.randomUUID()
           print "testing against namespace " + testNamespace
           String tempHelmRelease = (image + "-" + testNamespace)
@@ -325,8 +338,15 @@ def call(body) {
               }
             }
           }
+          if (body.metaClass.respondsTo("PostVerify")) {
+            body.PostVerify()
+          }
         }
       }
+
+      if (body.metaClass.respondsTo("PreDeploy")) {
+        body.PreDeploy()
+      fi
 
       def result="commitID=${gitCommit}\\n" + 
            "fullCommit=${fullCommitID}\\n" +
