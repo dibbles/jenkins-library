@@ -137,11 +137,8 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        if (body.PreExtract()) {
-          body.PreExtract()
-        } else {
-          echo "No custom PreExtract() method in Jenkinsfile."
-        } 
+        echo body.metaClass
+        body.PreExtract()
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
