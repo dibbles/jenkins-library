@@ -40,7 +40,7 @@ import java.util.UUID
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
-def call(body) {
+def call(def body = null) {
 
   def config = [:]
   // Parameter expansion works after the call to body() below.
