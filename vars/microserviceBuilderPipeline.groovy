@@ -42,10 +42,6 @@ import groovy.json.JsonSlurperClassic;
 
 def call(body) {
 
-  def foo() {
-   echo "1"
-  }
-
   def config = [:]
   // Parameter expansion works after the call to body() below.
   // See https://jenkins.io/doc/book/pipeline/shared-libraries/ 'Defining a more structured DSL'
@@ -469,3 +465,5 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
     }
   }
 }
+
+def foo() {}
