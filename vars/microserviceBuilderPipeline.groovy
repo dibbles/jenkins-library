@@ -40,7 +40,7 @@ import java.util.UUID
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurperClassic;
 
-def call(body) {
+def call(def body = null) {
   def config = [:]
   // Parameter expansion works after the call to body() below.
   // See https://jenkins.io/doc/book/pipeline/shared-libraries/ 'Defining a more structured DSL'
@@ -462,6 +462,7 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
       }
     }
   }
+}
 
 def PreExtract() {echo "No custom PreExtract() method in Jenkinsfile."}
 def PostExtract() {echo "No custom PostExtract() method in Jenkinsfile."}
@@ -472,5 +473,3 @@ def PostDockerBuild() {echo "No custom PostDockerBuild() method in Jenkinsfile."
 def PreVerify() {echo "No custom PreVerify() method in Jenkinsfile."}
 def PostVerify() {echo "No custom PostVerify() method in Jenkinsfile."}
 def PreDeploy() {echo "No custom PreDeploy() method in Jenkinsfile."}
-
-}
