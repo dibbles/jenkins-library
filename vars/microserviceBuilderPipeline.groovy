@@ -137,10 +137,14 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        body.metaClass.respondsTo(body, "PreExtract")
-        body.metaClass.respondsTo(body, 'PreExtract')
-        body.metaClass.respondsTo("PreExtract")
-        body.metaClass.respondsTo('PreExtract')
+        def a = body.metaClass.respondsTo(body, "PreExtract")
+        def b = body.metaClass.respondsTo(body, 'PreExtract')
+        def c = body.metaClass.respondsTo("PreExtract")
+        def d = body.metaClass.respondsTo('PreExtract')
+        echo String.valueOf(a)
+        echo String.valueOf(b)
+        echo String.valueOf(c)
+        echo String.valueOf(d)
         body.PreExtract()
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
