@@ -138,8 +138,11 @@ def call(body) {
 
       stage ('Extract') {
         // if (body.metaClass.respondsTo(body,'PreExtract')) {
+        if (body.respondsTo("PreExtract")) {
           body.PreExtract()
-        //}
+        } else {
+          echo "FOOOOO"
+        }
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
