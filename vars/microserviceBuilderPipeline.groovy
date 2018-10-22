@@ -140,7 +140,7 @@ def call(body) {
         if (body.PreExtract()) {
           body.PreExtract()
         } else {
-          PreExtract()
+          echo "No custom PreExtract() method in Jenkinsfile."
         } 
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
@@ -467,23 +467,3 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
     }
   }
 }
-
-def PreExtract() {
-  echo "No custom PreExtract() method in Jenkinsfile."
-}
-
-def PostExtract() {echo "No custom PostExtract() method in Jenkinsfile."}
-
-def PreMavenBuild() {echo "No custom PreMavenBuild() method in Jenkinsfile."}
-
-def PostMavenBuild() {echo "No custom PostMavenBuild() method in Jenkinsfile."}
-
-def PreDockerBuild() {echo "No custom PreDockerBuild() method in Jenkinsfile."}
-
-def PostDockerBuild() {echo "No custom PostDockerBuild() method in Jenkinsfile."}
-
-def PreVerify() {echo "No custom PreVerify() method in Jenkinsfile."}
-
-def PostVerify() {echo "No custom PostVerify() method in Jenkinsfile."}
-
-def PreDeploy() {echo "No custom PreDeploy() method in Jenkinsfile."}
