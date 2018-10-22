@@ -49,7 +49,7 @@ def call(body) {
   body.delegate = config
   body()
 
-  
+  stages {
   stage('Bob') {
     steps {
       script {
@@ -57,7 +57,7 @@ def call(body) {
       }
     }
   }
-
+}
   print "microserviceBuilderPipeline : config = ${config}"
 
   // User configurable options
