@@ -180,7 +180,7 @@ def call(body) {
         }
 
         if (fileExists('Dockerfile')) {
-          if (body.metaClass.respondsTo("PreDockerBuild") {
+          if (body.metaClass.respondsTo("PreDockerBuild")) {
             body.PreDockerBuild()
           }
           if (fileExists('Package.swift')) {          
