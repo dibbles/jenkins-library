@@ -137,12 +137,7 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-        // if (body.metaClass.respondsTo(body,'PreExtract')) {
-        if (body.respondsTo("PreExtract")) {
           body.PreExtract()
-        } else {
-          echo "FOOOOO"
-        }
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -155,9 +150,7 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
-        if (body.metaClass.respondsTo("PostExtract")) {
           body.PostExtract()
-        }
       }
 
       def imageTag = null
@@ -175,17 +168,13 @@ def call(body) {
                 body.PreMavenBuild()
               }
               sh mvnCommand
-              if (body.metaClass.respondsTo("PostMavenBuild")) {
                 body.PostMavenBuild()
-              }
             }
           }
         }
 
         if (fileExists('Dockerfile')) {
-          if (body.metaClass.respondsTo("PreDockerBuild")) {
             body.PreDockerBuild()
-          }
           if (fileExists('Package.swift')) {          
             echo "Detected Swift project with a Dockerfile..."
           
@@ -261,9 +250,7 @@ def call(body) {
             }
           }
         }
-        if (body.metaClass.respondsTo("PostDockerBuild")) {
           body.PostDockerBuild()
-        }
       }
 
       def realChartFolder = null
@@ -278,9 +265,7 @@ def call(body) {
 
       if (test && fileExists('pom.xml') && realChartFolder != null && fileExists(realChartFolder)) {
         stage ('Verify') {
-          if (body.metaClass.respondsTo("PreVerify")) {
             body.PreVerify()
-          }
           testNamespace = "testns-${env.BUILD_ID}-" + UUID.randomUUID()
           print "testing against namespace " + testNamespace
           String tempHelmRelease = (image + "-" + testNamespace)
@@ -341,15 +326,11 @@ def call(body) {
               }
             }
           }
-          if (body.metaClass.respondsTo("PostVerify")) {
             body.PostVerify()
-          }
         }
       }
 
-      if (body.metaClass.respondsTo("PreDeploy")) {
         body.PreDeploy()
-      }
 
       def result="commitID=${gitCommit}\\n" + 
            "fullCommit=${fullCommitID}\\n" +
@@ -483,12 +464,12 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
   }
 }
 
-//def PreExtract() {}
-def PostExtract() {}
-def PreMavenBuild() {}
-def PostMavenBuild() {}
-def PreDockerBuild() {}
-def PostDockerBuild() {}
-def PreVerify() {}
-def PostVerify() {}
-def PreDeploy() {}
+def PreExtract() {echo "No custom PreExtract() method in Jenkinsfile."}
+def PostExtract() {echo "No custom PostExtract() method in Jenkinsfile."}
+def PreMavenBuild() {echo "No custom PreMavenBuild() method in Jenkinsfile."}
+def PostMavenBuild() {echo "No custom PostMavenBuild() method in Jenkinsfile."}
+def PreDockerBuild() {echo "No custom PreDockerBuild() method in Jenkinsfile."}
+def PostDockerBuild() {echo "No custom PostDockerBuild() method in Jenkinsfile."}
+def PreVerify() {echo "No custom PreVerify() method in Jenkinsfile."}
+def PostVerify() {echo "No custom PostVerify() method in Jenkinsfile."}
+def PreDeploy() {echo "No custom PreDeploy() method in Jenkinsfile."}
