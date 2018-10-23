@@ -140,7 +140,7 @@ def call(body) {
 
       stage ('Extract') {
 
-        runCustomMethod("PreExtract")
+        runCustomMethod(body, "PreExtract")
 
         try {
           body.PreExtract()        
@@ -159,7 +159,7 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
-        runCustomMethod("PostExtract")
+        runCustomMethod(body, "PostExtract")
         try {
          body.PostExtract()
         } catch (NoSuchMethodError e) {
@@ -478,7 +478,7 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
   }
 }
 
-def runCustomMethod(String methodName) {
+def runCustomMethod(body, String methodName) {
   try {
     body.${methodName}()
   } catch (NoSuchMethodException e) {
