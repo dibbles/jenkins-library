@@ -140,13 +140,16 @@ def call(body) {
 
       stage ('Extract') {
 
-        runCustomMethod(body, "PreExtract")
-
         try {
+          echo "++++ PreExtract Entry ++++"
           body.PreExtract()        
         } catch (NoSuchMethodError e) {
           echo "No custom PreExtract() method in Jenkinsfile."
+        } finally {
+          echo "++++ PreExtract Exit ++++"
         }
+
+        echo "++++ Extract Entry ++++"
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -159,11 +162,15 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
-        runCustomMethod(body, "PostExtract")
+        echo "++++ Extract Exit ++++"
+
         try {
+         echo "++++ PostExtract Entry ++++"
          body.PostExtract()
         } catch (NoSuchMethodError e) {
-          echo "No customer PostExtract() method in Jenkinsfile."
+          echo "No custom PostExtract() method in Jenkinsfile."
+        } finally {
+          echo "++++ PostExtract Exit ++++"
         }
       }
 
@@ -172,23 +179,49 @@ def call(body) {
       if (build) {
         if (fileExists('pom.xml')) {
           stage ('Maven Build') {
+            try{
+              echo "++++ PreMavenBuild Entry ++++"
+              body.PreMavenBuild()
+            } catch (NoSuchMethodException e) {
+              echo "No custom PreMavenBuild() method in Jenkinsfile."
+            } finally {
+              echo "++++ PreMavenBuild Exit ++++"
+            }
+         
             container ('maven') {
+              echo "++++ Maven Build Entry ++++"
               def mvnCommand = "mvn -B"
               if (mavenSettingsConfigMap) {
                 mvnCommand += " --settings /msb_mvn_cfg/settings.xml"
               }
               mvnCommand += " ${mvnCommands}"
-              if (body.metaClass.respondsTo("PreMavenBuild")) {
-                body.PreMavenBuild()
-              }
               sh mvnCommand
-                body.PostMavenBuild()
+              echo "++++ Maven Build Exit ++++"
             }
+ 
+            try{
+              echo "++++ PostMavenBuild Entry ++++"
+              body.PostMavenBuild()
+            } catch (NoSuchMethodException e) {
+              echo "No custom PostMavenBuild() method in Jenkinsfile."
+            } finally {
+              echo "++++ PostMavenBuild Exit ++++"
+            }
+
           }
         }
 
         if (fileExists('Dockerfile')) {
-            body.PreDockerBuild()
+          try{
+              echo "++++ PreDockerBuild Entry ++++"
+              body.PreDockerBuild()
+            } catch (NoSuchMethodException e) {
+              echo "No custom PreDockerBuild() method in Jenkinsfile."
+            } finally {
+              echo "++++ PreDockerBuild Exit ++++"
+            }
+          
+          echo "++++ Docker Build Stage Entry ++++"
           if (fileExists('Package.swift')) {          
             echo "Detected Swift project with a Dockerfile..."
           
@@ -264,7 +297,16 @@ def call(body) {
             }
           }
         }
+        echo "++++ Docker Build Stage Exit ++++"
+
+        try {
+          echo "++++ PostDockerBuild Entry ++++"
           body.PostDockerBuild()
+        } catch (NoSuchMethodException e) {
+          echo "No custom PostDockerBuild() method in Jenkinsfile."
+        } finally {
+          echo "++++ PostDockerBuild Exit ++++"
+        }
       }
 
       def realChartFolder = null
