@@ -141,15 +141,15 @@ def call(body) {
       stage ('Extract') {
 
         try {
-          echo "++++ PreExtract Entry ++++"
+          echo "++++ Pre Extract Stage Entry ++++"
           body.PreExtract()        
         } catch (NoSuchMethodError e) {
           echo "No custom PreExtract() method in Jenkinsfile."
         } finally {
-          echo "++++ PreExtract Exit ++++"
+          echo "++++ Pre Extract Stage Exit ++++"
         }
 
-        echo "++++ Extract Entry ++++"
+        echo "++++ Extract Stage Entry ++++"
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -162,15 +162,15 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
-        echo "++++ Extract Exit ++++"
+        echo "++++ Extract Stage Exit ++++"
 
         try {
-         echo "++++ PostExtract Entry ++++"
+         echo "++++ Post Extract Stage Entry ++++"
          body.PostExtract()
         } catch (NoSuchMethodError e) {
           echo "No custom PostExtract() method in Jenkinsfile."
         } finally {
-          echo "++++ PostExtract Exit ++++"
+          echo "++++ Post Extract Stage Exit ++++"
         }
       }
 
@@ -180,32 +180,32 @@ def call(body) {
         if (fileExists('pom.xml')) {
           stage ('Maven Build') {
             try{
-              echo "++++ PreMavenBuild Entry ++++"
+              echo "++++ Pre Maven Build Stage Entry ++++"
               body.PreMavenBuild()
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodError e) {
               echo "No custom PreMavenBuild() method in Jenkinsfile."
             } finally {
-              echo "++++ PreMavenBuild Exit ++++"
+              echo "++++ Pre Maven Build Stage Exit ++++"
             }
          
             container ('maven') {
-              echo "++++ Maven Build Entry ++++"
+              echo "++++ Maven Build Stage Entry ++++"
               def mvnCommand = "mvn -B"
               if (mavenSettingsConfigMap) {
                 mvnCommand += " --settings /msb_mvn_cfg/settings.xml"
               }
               mvnCommand += " ${mvnCommands}"
               sh mvnCommand
-              echo "++++ Maven Build Exit ++++"
+              echo "++++ Maven Build Stage Exit ++++"
             }
  
             try{
-              echo "++++ PostMavenBuild Entry ++++"
+              echo "++++ Post Maven Build Stage Entry ++++"
               body.PostMavenBuild()
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodError e) {
               echo "No custom PostMavenBuild() method in Jenkinsfile."
             } finally {
-              echo "++++ PostMavenBuild Exit ++++"
+              echo "++++ Post Maven Build Stage Exit ++++"
             }
 
           }
@@ -213,12 +213,12 @@ def call(body) {
 
         if (fileExists('Dockerfile')) {
           try{
-              echo "++++ PreDockerBuild Entry ++++"
+              echo "++++ Pre Docker Build Stage Entry ++++"
               body.PreDockerBuild()
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodError e) {
               echo "No custom PreDockerBuild() method in Jenkinsfile."
             } finally {
-              echo "++++ PreDockerBuild Exit ++++"
+              echo "++++ Pre Docker Build Stage Exit ++++"
             }
           
           echo "++++ Docker Build Stage Entry ++++"
@@ -300,12 +300,12 @@ def call(body) {
         echo "++++ Docker Build Stage Exit ++++"
 
         try {
-          echo "++++ PostDockerBuild Entry ++++"
+          echo "++++ Post Docker Build Stage Entry ++++"
           body.PostDockerBuild()
-        } catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodError e) {
           echo "No custom PostDockerBuild() method in Jenkinsfile."
         } finally {
-          echo "++++ PostDockerBuild Exit ++++"
+          echo "++++ Post Docker Build Stage Exit ++++"
         }
       }
 
@@ -320,8 +320,16 @@ def call(body) {
       }
 
       if (test && fileExists('pom.xml') && realChartFolder != null && fileExists(realChartFolder)) {
+        try {
+          echo "++++ Pre Verify Stage Entry ++++"
+          body.PreVerify()
+        } catch (NoSuchMethodError e) {
+          echo "No custom PreVerify() method in Jenkinsfile."
+        } finally {
+          echo "++++ Pre Verify Stage Exit ++++"
+        }
         stage ('Verify') {
-            body.PreVerify()
+          echo "++++ Verify Stage Entry ++++"
           testNamespace = "testns-${env.BUILD_ID}-" + UUID.randomUUID()
           print "testing against namespace " + testNamespace
           String tempHelmRelease = (image + "-" + testNamespace)
@@ -382,11 +390,27 @@ def call(body) {
               }
             }
           }
-            body.PostVerify()
+        }
+        echo "++++ Verify Stage Exit ++++"
+        
+        try {
+          echo "++++ Post Verify Stage Entry ++++"
+          body.PostVerify()
+        } catch (NoSuchMethodError e) {
+          echo "No custom PostVerify() method in Jenkinsfile."
+        } finally {
+          echo "++++ Post Verify Stage Exit ++++"
         }
       }
 
+      try {
+        echo "++++ Pre Deploy Stage Entry ++++"
         body.PreDeploy()
+      } catch (NoSuchMethodError e) {
+        echo "No custom PreDeploy() method in Jenkinsfile."
+      } finally {
+        echo "++++ Pre Deploy Stage Exit ++++"
+      }
 
       def result="commitID=${gitCommit}\\n" + 
            "fullCommit=${fullCommitID}\\n" +
