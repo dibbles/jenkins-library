@@ -80,8 +80,6 @@ def call(body) {
   def kubectl = (config.kubectlImage == null) ? 'ibmcom/k8s-kubectl:v1.8.3' : config.kubectlImage
   def helm = (config.helmImage == null) ? 'lachlanevenson/k8s-helm:v2.9.1' : config.helmImage
 
-  def faa =config.PreExtract
-  print "${faa}"
 
   print "microserviceBuilderPipeline: image=${image} build=${build} deploy=${deploy} mvnCommands=${mvnCommands} \
   test=${test} debug=${debug} chartFolder=${chartFolder} libertyLicenseJarName=${libertyLicenseJarName} \
@@ -141,8 +139,11 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
-      
-        body.PreExtract()        
+        try {
+          body.PreExtract()        
+        } catch (NoSuchMethodError e) {
+          echo "No custom PreExtract() method in Jenkinsfile."
+        }
 	checkout scm
 	fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 	gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -155,7 +156,11 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
-          body.PostExtract()
+        try {
+         body.PostExtract()
+        } catch (NoSuchMethodError e) {
+          echo "No customer PostExtract() method in Jenkinsfile."
+        }
       }
 
       def imageTag = null
