@@ -144,7 +144,7 @@ def call(body) {
           echo "++++ Pre Extract Stage Entry ++++"
           body.PreExtract()        
         } catch (NoSuchMethodError e) {
-          echo "No custom PreExtract() method in Jenkinsfile."
+          echo "No PreExtract() method in Jenkinsfile."
         } finally {
           echo "++++ Pre Extract Stage Exit ++++"
         }
@@ -168,7 +168,7 @@ def call(body) {
          echo "++++ Post Extract Stage Entry ++++"
          body.PostExtract()
         } catch (NoSuchMethodError e) {
-          echo "No custom PostExtract() method in Jenkinsfile."
+          echo "No PostExtract() method in Jenkinsfile."
         } finally {
           echo "++++ Post Extract Stage Exit ++++"
         }
@@ -183,7 +183,7 @@ def call(body) {
               echo "++++ Pre Maven Build Stage Entry ++++"
               body.PreMavenBuild()
             } catch (NoSuchMethodError e) {
-              echo "No custom PreMavenBuild() method in Jenkinsfile."
+              echo "No PreMavenBuild() method in Jenkinsfile."
             } finally {
               echo "++++ Pre Maven Build Stage Exit ++++"
             }
@@ -203,7 +203,7 @@ def call(body) {
               echo "++++ Post Maven Build Stage Entry ++++"
               body.PostMavenBuild()
             } catch (NoSuchMethodError e) {
-              echo "No custom PostMavenBuild() method in Jenkinsfile."
+              echo "No PostMavenBuild() method in Jenkinsfile."
             } finally {
               echo "++++ Post Maven Build Stage Exit ++++"
             }
@@ -216,7 +216,7 @@ def call(body) {
               echo "++++ Pre Docker Build Stage Entry ++++"
               body.PreDockerBuild()
             } catch (NoSuchMethodError e) {
-              echo "No custom PreDockerBuild() method in Jenkinsfile."
+              echo "No PreDockerBuild() method in Jenkinsfile."
             } finally {
               echo "++++ Pre Docker Build Stage Exit ++++"
             }
@@ -303,7 +303,7 @@ def call(body) {
           echo "++++ Post Docker Build Stage Entry ++++"
           body.PostDockerBuild()
         } catch (NoSuchMethodError e) {
-          echo "No custom PostDockerBuild() method in Jenkinsfile."
+          echo "No PostDockerBuild() method in Jenkinsfile."
         } finally {
           echo "++++ Post Docker Build Stage Exit ++++"
         }
@@ -324,7 +324,7 @@ def call(body) {
           echo "++++ Pre Verify Stage Entry ++++"
           body.PreVerify()
         } catch (NoSuchMethodError e) {
-          echo "No custom PreVerify() method in Jenkinsfile."
+          echo "No PreVerify() method in Jenkinsfile."
         } finally {
           echo "++++ Pre Verify Stage Exit ++++"
         }
@@ -397,7 +397,7 @@ def call(body) {
           echo "++++ Post Verify Stage Entry ++++"
           body.PostVerify()
         } catch (NoSuchMethodError e) {
-          echo "No custom PostVerify() method in Jenkinsfile."
+          echo "No PostVerify() method in Jenkinsfile."
         } finally {
           echo "++++ Post Verify Stage Exit ++++"
         }
@@ -407,7 +407,7 @@ def call(body) {
         echo "++++ Pre Deploy Stage Entry ++++"
         body.PreDeploy()
       } catch (NoSuchMethodError e) {
-        echo "No custom PreDeploy() method in Jenkinsfile."
+        echo "No PreDeploy() method in Jenkinsfile."
       } finally {
         echo "++++ Pre Deploy Stage Exit ++++"
       }
@@ -544,10 +544,3 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
   }
 }
 
-def runCustomMethod(body, String methodName) {
-  try {
-    body.$methodName()
-  } catch (NoSuchMethodException e) {
-    echo "No custom ${methodName}() method in Jenkinsfile."
-  }
-}
