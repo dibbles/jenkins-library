@@ -480,7 +480,7 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
 
 def runCustomMethod(body, String methodName) {
   try {
-    body.methodName()
+    body.$methodName()
   } catch (NoSuchMethodException e) {
     echo "No custom ${methodName}() method in Jenkinsfile."
   }
