@@ -139,6 +139,9 @@ def call(body) {
       devopsEndpoint = "https://${devopsHost}:${devopsPort}"
 
       stage ('Extract') {
+
+        runCustomMethod("PreExtract")
+
         try {
           body.PreExtract()        
         } catch (NoSuchMethodError e) {
@@ -156,6 +159,7 @@ def call(body) {
 	}
 	gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
 	echo "Checked out git commit ${gitCommit}"
+        runCustomMethod("PostExtract")
         try {
          body.PostExtract()
         } catch (NoSuchMethodError e) {
@@ -474,4 +478,10 @@ def getChartFolder(String userSpecified, String currentChartFolder) {
   }
 }
 
-def PreExtract() { echo "waaaaa" }
+def runCustomMethod(String methodName) {
+  try {
+    body.${methodName}()
+  } catch (NoSuchMethodException e) {
+    echo "No custom ${methodName}() method in Jenkinsfile."
+  }
+}
