@@ -128,6 +128,7 @@ def call(body) {
     volumes: volumes
   ) {
     node('microclimatePod') {
+     withEnv(['IMAGE=${image}', 'IMAGE_TAG=${imageTag}']) {
       def gitCommit
       def previousCommit
       def gitCommitMessage
@@ -430,6 +431,7 @@ def call(body) {
         notifyDevops(gitCommit, fullCommitID, registry + image, imageTag, 
           branchName, "build", projectName, projectNamespace, env.BUILD_NUMBER.toInteger())
       }
+     }
     }
   }
 }
