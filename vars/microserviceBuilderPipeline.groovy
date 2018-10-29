@@ -407,7 +407,7 @@ def call(body) {
 
       try {
         echo "++++ Pre Deploy Stage Entry ++++"
-        withEnv(["IMAGE=${image}","IMAGE_TAG=${imageTag}"]) {
+        withEnv(["IMAGE="${image},"IMAGE_TAG="${imageTag}]) {
           body.PreDeploy()
         }
       } catch (NoSuchMethodError e) {
