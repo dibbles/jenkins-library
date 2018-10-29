@@ -128,7 +128,6 @@ def call(body) {
     volumes: volumes
   ) {
     node('microclimatePod') {
-     withEnv(['IMAGE=${image}', 'IMAGE_TAG=${imageTag}']) {
       def gitCommit
       def previousCommit
       def gitCommitMessage
@@ -257,8 +256,10 @@ def call(body) {
               print "${fileContents}"       
             }
           }
-          
+         
+ 
           stage ('Docker Build') {
+
             container ('docker') {
               imageTag = gitCommit
               def buildCommand = "docker build -t ${image}:${imageTag} "
@@ -302,7 +303,7 @@ def call(body) {
 
         try {
           echo "++++ Post Docker Build Stage Entry ++++"
-          body.PostDockerBuild()
+            body.PostDockerBuild()
         } catch (NoSuchMethodError e) {
           echo "No PostDockerBuild() method in Jenkinsfile."
         } finally {
@@ -406,7 +407,9 @@ def call(body) {
 
       try {
         echo "++++ Pre Deploy Stage Entry ++++"
-        body.PreDeploy()
+        withEnv(["IMAGE=${image}","IMAGE_TAG=${imageTag}"]) {
+          body.PreDeploy()
+        }
       } catch (NoSuchMethodError e) {
         echo "No PreDeploy() method in Jenkinsfile."
       } finally {
@@ -431,7 +434,7 @@ def call(body) {
         notifyDevops(gitCommit, fullCommitID, registry + image, imageTag, 
           branchName, "build", projectName, projectNamespace, env.BUILD_NUMBER.toInteger())
       }
-     }
+     
     }
   }
 }
