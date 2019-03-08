@@ -198,7 +198,10 @@ def call(body) {
         }      
       } catch (NoSuchMethodError e) {
         echo "No PostExtract() method in Jenkinsfile."
-      } finally {
+      } catch (Exception ex) {
+        echo "Unexpected error occured: ${ex}"
+      }
+      finally {
         echo "++++ Post Extract Exit ++++"
       }
 
@@ -534,7 +537,7 @@ def call(body) {
 
       try {
         echo "++++ Pre Notify Entry ++++"
-        withEnv(["IMAGE=${image}","IMAGETAG=${imageTag}"]) {
+        withEnv(["REGISTRY=${registry}","IMAGE=${image}","IMAGETAG=${imageTag}"]) {
           body.PreNotify()
         }
       } catch (NoSuchMethodError e) {
