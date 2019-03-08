@@ -144,9 +144,20 @@ def call(body) {
 
       def imageTag = null
       def helmInitialized = false // Lazily initialize Helm but only once
+
+      try {
+        echo "++++ Pre Extract Entry ++++"
+        body.PreExtract()        
+      } catch (NoSuchMethodError e) {
+        echo "No PreExtract() method in Jenkinsfile."
+      } finally {
+        echo "++++ Pre Extract Exit ++++"
+      }
+
       stage ('Extract') {
         try {
-	  printTime("In the extract stage")
+      
+          printTime("In the extract stage")
           if (extraGitOptions) {
             echo "Extra Git options found, setting Git config options to include ${extraGitOptions}"
             configSet = sh(script: "git config ${extraGitOptions}", returnStdout: true)
@@ -157,7 +168,7 @@ def call(body) {
           }
           checkout scm
 
-	  printTime("checkout scm done")
+          printTime("checkout scm done")
 
           fullCommitID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
           gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -169,8 +180,8 @@ def call(body) {
             echo "Previous commit exists: ${previousCommit}"
           }
           gitCommitMessage = sh(script: 'git log --format=%B -n 1 ${gitCommit}', returnStdout: true)
-	  gitCommitMessage = gitCommitMessage.replace("'", "\'");
-	  echo "Git commit message is: ${gitCommitMessage}"
+          gitCommitMessage = gitCommitMessage.replace("'", "\'");
+          echo "Git commit message is: ${gitCommitMessage}"
           echo "Checked out git commit ${gitCommit}"
         } catch(Exception ex) {
           print "Error in Extract: " + ex.toString()
@@ -180,19 +191,40 @@ def call(body) {
         }
       } 
 
+      try {
+        echo "++++ Post Extract Entry ++++"
+        withEnv(["SHORTCOMMIT=${gitCommit}","FULLCOMMIT=${fullCommitID}","COMMITMSG=${gitCommitMessage}"]) {
+          body.PostExtract()
+        }      
+      } catch (NoSuchMethodError e) {
+        echo "No PostExtract() method in Jenkinsfile."
+      } finally {
+        echo "++++ Post Extract Exit ++++"
+      }
+
       if (build) {
         if (fileExists('pom.xml')) {
+           
+          try {
+            echo "++++ Pre Maven Entry ++++"
+            body.PreMaven()
+          } catch (NoSuchMethodError e) {
+            echo "No PreMaven() method in Jenkinsfile."
+          } finally {
+            echo "++++ Pre Maven Exit ++++"
+          }
+          
           stage ('Maven Build') {
             try {
               container ('maven') {
-	        printTime("Starting maven build")
+                printTime("Starting maven build")
                 def mvnCommand = "mvn -B"
                 if (mavenSettingsConfigMap) {
                   mvnCommand += " --settings /msb_mvn_cfg/settings.xml"
                 }
                 mvnCommand += " ${mvnCommands}"
                 sh mvnCommand
-	        printTime("Done Maven build")
+                printTime("Done Maven build")
               }
             } catch(Exception ex) {
               print "Error in Maven build:" + ex.toString()
@@ -203,7 +235,26 @@ def call(body) {
           }
         }
 
+        try {
+          echo "++++ Post Maven Entry ++++"
+          body.PostMaven()
+        } catch (NoSuchMethodError e) {
+          echo "No PostMaven() method in Jenkinsfile."
+        } finally {
+          echo "++++ Post Maven Exit ++++"
+        }
+        
         if (fileExists('Dockerfile')) {
+          
+          try {
+            echo "++++ Pre Docker Entry ++++"
+            body.PreDocker()
+          } catch (NoSuchMethodError e) {
+            echo "No PreDocker() method in Jenkinsfile."
+          } finally {
+            echo "++++ Pre Docker Exit ++++"
+          }       
+
           if (fileExists('Package.swift')) {          
             echo "Detected Swift project with a Dockerfile..."
           
@@ -242,7 +293,7 @@ def call(body) {
           stage ('Docker Build') {
             try {
             container ('docker') {
-	      printTime("About to Docker build")
+               printTime("About to Docker build")
               imageTag = gitCommit
               def buildCommand = "docker build -t ${image}:${imageTag} "
               buildCommand += "--label org.label-schema.schema-version=\"1.0\" "
@@ -273,14 +324,14 @@ def call(body) {
                 sh "mkdir -p /home/jenkins/.docker"
                 sh "ln -s -f /msb_reg_sec/.dockerconfigjson /home/jenkins/.docker/config.json"
               }
-	      printTime("About to do build command")
+              printTime("About to do build command")
               sh buildCommand
-	      printTime("Done the build command")
+              printTime("Done the build command")
               if (registry) {
                 sh "docker tag ${image}:${imageTag} ${registry}${image}:${imageTag}"
-		printTime("Pushing to Docker registry")
+                printTime("Pushing to Docker registry")
                 sh "docker push ${registry}${image}:${imageTag}"
-		printTime("Done pushing to Docker registry")
+              	printTime("Done pushing to Docker registry")
               }
             }
             } catch(Exception ex) {
@@ -290,12 +341,24 @@ def call(body) {
               error "Stop execution: " + ex.toString()  
             }
           }
+
+          try {
+            echo "++++ Post Docker Entry ++++"
+            withEnv(["REGISTRY=${registry}","IMAGE=${image}","IMAGETAG=${imageTag}"]) {
+              body.PostDocker()
+            }
+          } catch (NoSuchMethodError e) {
+            echo "No PostDocker() method in Jenkinsfile."
+          } finally {
+            echo "++++ Post Docker Exit ++++"
+          }  
+
         }
       }
 
       def realChartFolder = null
       def testsAttempted = false
-	    
+
       if (fileExists(chartFolder)) {
         // find the likely chartFolder location
         realChartFolder = getChartFolder(userSpecifiedChartFolder, chartFolder)
@@ -306,9 +369,19 @@ def call(body) {
       }
 
       if (test && fileExists('pom.xml') && realChartFolder != null && fileExists(realChartFolder)) {
+      
+        try {
+          echo "++++ Pre Verify Entry ++++"
+          body.PreVerify()
+        } catch (NoSuchMethodError e) {
+          echo "No PreVerify() method in Jenkinsfile."
+        } finally {
+          echo "++++ Pre Verify Exit ++++"
+        }
+      
         stage ('Verify') {
-	  printTime("In verify stage")
-	  testsAttempted = true
+          printTime("In verify stage")
+          testsAttempted = true
           testNamespace = "testns-${env.BUILD_ID}-" + UUID.randomUUID()
           echo "testing against namespace " + testNamespace
           String tempHelmRelease = (image + "-" + testNamespace)
@@ -316,7 +389,7 @@ def call(body) {
           while (tempHelmRelease.endsWith('-') || tempHelmRelease.length() > 53) tempHelmRelease = tempHelmRelease.substring(0,tempHelmRelease.length()-1)
   
           container ('kubectl') {
-	   printTime("In kubectl container")
+            printTime("In kubectl container")
             def testNSCreationAttempt = sh(returnStatus: true, script: "kubectl create namespace ${testNamespace} > ns_creation_attempt.txt")
             if (testNSCreationAttempt != 0) {
               echo "Warning, did not create the test namespace successfully, error code is: ${testNSCreationAttempt}"		
@@ -333,12 +406,12 @@ def call(body) {
           }
 
           if (!helmInitialized) {
-	    printTime("Init helm")
+            printTime("Init helm")
             initalizeHelm ()
             helmInitialized = true
-	    printTime("Done with init helm")
+	          printTime("Done with init helm")
           }
-	
+
           container ('helm') {
             echo "Attempting to deploy the test release"
             printTime("About to Helm install as part of verify")
@@ -350,9 +423,9 @@ def call(body) {
               echo "Adding --tls to your deploy command"
               deployCommand += helmTlsOptions
             }
-	    printTime("About to deploy test release")
+            printTime("About to deploy test release")
             testDeployAttempt = sh(script: "${deployCommand} > deploy_attempt.txt", returnStatus: true)
-	    printTime("Done deploying test release")
+            printTime("Done deploying test release")
             if (testDeployAttempt != 0) {
               echo "Warning, did not deploy the test release into the test namespace successfully, error code is: ${testDeployAttempt}" 
               echo "This build will be marked as a failure: halting after the deletion of the test namespace."
@@ -363,19 +436,19 @@ def call(body) {
           container ('maven') {
             try {
               // We have a test release that we can run our Maven tests on	
-	      printTime("In Maven container to run tests with")
+              printTime("In Maven container to run tests with")
               if (testDeployAttempt == 0) {
                 def mvnCommand = "mvn -B -Dnamespace.use.existing=${testNamespace} -Denv.init.enabled=false"
                 if (mavenSettingsConfigMap) {
                   mvnCommand += " --settings /msb_mvn_cfg/settings.xml"
                 }
                 mvnCommand += " verify"
-		printTime("About to verify")
+                printTime("About to verify")
                 verifyAttempt = sh(script: "${mvnCommand} > verify_attempt.txt", returnStatus: true)
                 if (verifyAttempt != 0) {
                   echo "Warning, did not run ${mvnCommand} successfully, error code is: ${verifyAttempt}"		
                 }
-		printTime("Done the verify")
+                printTime("Done the verify")
                 printFromFile("verify_attempt.txt")    
               } else {
                 echo "Not running tests as we detected that your test release failed to deploy"
@@ -387,36 +460,46 @@ def call(body) {
                 container ('kubectl') {
                   if (fileExists(realChartFolder)) {
                     container ('helm') {
-		      printTime("About to helm delete")
+                      printTime("About to helm delete")
                       def deleteCommand = "helm delete ${tempHelmRelease} --purge"
                       if (helmSecret) {
                         echo "adding --tls"
                         deleteCommand += helmTlsOptions
                       }
                       // Until this is done, we can't get both stdout and the status code... https://issues.jenkins-ci.org/browse/JENKINS-44930?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&showAll=true
-		      printTime("About to delete test release")	    
+                      printTime("About to delete test release")	    
                       def deletionAttempt = sh(script: "$deleteCommand > delete_test_release_attempt.txt", returnStatus: true)
                       if (deletionAttempt != 0) {
                         echo "Did not delete the test Helm release, error code from ${deleteCommand} is: ${deletionAttempt}" 
                       }
-		      printTime("Done attempting to delete test release")
+                      printTime("Done attempting to delete test release")
                       printFromFile("delete_test_release_attempt.txt")
                     }
                   }
                   // Intentionally do this as the final step in here so we can actually delete it
                   // A namespace will not be removed if there's a Kube resource still active in there
-		  printTime("Attempting to delete test namespace")
+                  printTime("Attempting to delete test namespace")
                   def testNSDeletionAttempt = sh(script: "kubectl delete namespace ${testNamespace} > delete_test_namespace_attempt.txt", returnStatus: true)
                   if (testNSDeletionAttempt != 0) {
                     echo "Did not delete the test namespace ${testNamespace} successfully, error code is: ${testNSDeletionAttempt}" 
                   }
-		  printTime("Done attempting to delete test namespace")
+                  printTime("Done attempting to delete test namespace")
                   printFromFile("delete_test_namespace_attempt.txt")
                 }                
               }
             }
           }
         }
+
+        try {
+          echo "++++ Post Verify Entry ++++"
+          body.PostVerify()
+        } catch (NoSuchMethodError e) {
+          echo "No PostVerify() method in Jenkinsfile."
+        } finally {
+          echo "++++ Post Verify Exit ++++"
+        }
+
       }
       def result="commitID=${gitCommit}\\n" + 
            "fullCommit=${fullCommitID}\\n" +
@@ -426,7 +509,7 @@ def call(body) {
            "imageTag=${imageTag}"
       
       sh "echo \"${result}\" > buildData.txt"
-	    
+
       printTime("About to archive artifacts")
       archiveArtifacts 'buildData.txt'
       printTime("Done archiving artifacts")
@@ -437,10 +520,10 @@ def call(body) {
       // If tests were attempted, and then a problem happened (tests failed, or it didn't deploy, fail the build.
       // testsAttempted is set when we enter our testing block: which currently only supports Maven projects.
       if (testsAttempted) {
-	      echo "Result of verification is " + verifyAttempt
-	      echo "Result of the test deploy attempt is: " + testDeployAttempt
-	      echo "If either of these values are not 0, we will fail the build"
-	      
+        echo "Result of verification is " + verifyAttempt
+        echo "Result of the test deploy attempt is: " + testDeployAttempt
+        echo "If either of these values are not 0, we will fail the build"
+
         if (verifyAttempt != 0 || testDeployAttempt != 0) {
           def message = "Marking the build as a failed one: test was set to true " +
             "and a non-zero return code was returned when running the verify stage in this pipeline. " +
@@ -448,19 +531,31 @@ def call(body) {
             error(message) // this fails the build with an error
         }
       }
+
+      try {
+        echo "++++ Pre Notify Entry ++++"
+        withEnv(["IMAGE=${image}","IMAGETAG=${imageTag}"]) {
+          body.PreNotify()
+        }
+      } catch (NoSuchMethodError e) {
+        echo "No PreNotify() method in Jenkinsfile."
+      } finally {
+        echo "++++ Pre Notify Exit ++++"
+      }
+
       echo "Deploy is " + deploy
       if (deploy) {
         if (!helmInitialized) {
           initalizeHelm ()
           helmInitialized = true
         }
-	printTime("About to notify devops")
-	echo "Notifying Devops"
+        printTime("About to notify devops")
+        echo "Notifying Devops"
         stage ('Notify Devops') {	  
           notifyDevops(gitCommit, fullCommitID, registry + image, imageTag, 
             branchName, "build", projectName, projectNamespace, env.BUILD_NUMBER.toInteger(), "")
         }
-	printTime("Done notifying devops")
+        printTime("Done notifying devops")
       }
     }
   }
